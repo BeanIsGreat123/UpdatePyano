@@ -1,4 +1,3 @@
-import time
 import sys
 import pygame
 from pygame import mixer
@@ -6,6 +5,7 @@ from pygame.locals import *
 from Key import *
 from Song import *
 from Flote import *
+import math
 
 pygame.init()
 pygame.mixer.init()
@@ -48,9 +48,15 @@ screen = pygame.display.set_mode((screen_width, screen_height))
 # set tag to Pyano
 pygame.display.set_caption('Pyano')
 
+# load in images and set their sizes
 back_img = pygame.image.load("images_for_pyano/pyano_back.jpg")
+choose_img = pygame.image.load("images_for_pyano/beethoven.jpg").convert_alpha()
+choose_img = pygame.transform.scale(choose_img, (screen_width, screen_height))
+pyth_img = pygame.image.load("images_for_pyano/img_of_python_logo.jpg").convert_alpha()
+pyth_img = pygame.transform.scale(pyth_img, (screen_width, screen_height))
 
 
+# fast way to make display buttons
 def insrtButton(red, green, blue, text, rect, xCord, yCord):
     white = (255, 255, 255)
     incolor = (red, green, blue)
@@ -64,8 +70,8 @@ def menu():
     click = False
     while True:
 
-        screen.fill((255, 255, 255))
-
+        screen.blit(pyth_img, (0, 0))
+        screen.blit(pygame.font.SysFont('Arial', 70).render("Pyano", True, (0, 0, 0)), (300, 100))
         mouseX, mouseY = pygame.mouse.get_pos()
         buttonSong = pygame.Rect(300, 450, 150, 35)
         insrtButton(51, 208, 255, "Play song", buttonSong, 300, 450)
@@ -78,45 +84,6 @@ def menu():
         if buttonFree.collidepoint((mouseX, mouseY)):
             if click:
                 freeGame()
-
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
-            if event.type == KEYDOWN:
-                if event.key == K_ESCAPE:
-                    pygame.quit()
-                    sys.exit()
-            if event.type == MOUSEBUTTONDOWN:
-                if event.button == 1:
-                    click = True
-
-        pygame.display.update()
-
-
-def chooseSong():
-    click = False
-    while True:
-
-        screen.fill((255, 255, 255))
-
-        mouseX, mouseY = pygame.mouse.get_pos()
-        buttonMary = pygame.Rect(300, 450, 320, 35)
-        buttonBeau = pygame.Rect(300, 500, 220, 35)
-        buttonKnights = pygame.Rect(300, 400, 300, 35)
-        insrtButton(51, 208, 255, "Mary had a Little Lamb", buttonMary, 300, 450)
-        insrtButton(51, 208, 255, "Beau's Favorite", buttonBeau, 300, 500)
-        insrtButton(51, 208, 255, "Dance of the Knights", buttonKnights, 300, 400)
-
-        if buttonMary.collidepoint((mouseX, mouseY)):
-            if click:
-                game("ytrtyyy ttt yii ytrtyyyyttytr")
-        if buttonBeau.collidepoint((mouseX, mouseY)):
-            if click:
-                game("qwertyuiop")
-        if buttonKnights.collidepoint((mouseX, mouseY)):
-            if click:
-                game("w tu oR ou tw")
 
         click = False
 
@@ -135,10 +102,63 @@ def chooseSong():
         pygame.display.update()
 
 
+# interface for choose screen
+def chooseSong():
+    click = False
+    running = True
+    while running:
+
+        # set beethoven img
+        screen.blit(choose_img, (0, 0))
+
+        # display title
+        screen.blit(pygame.font.SysFont('Arial', 70).render("Choose a song", True, (255, 255, 255)), (300, 100))
+
+        # get mouse cords
+        mouseX, mouseY = pygame.mouse.get_pos()
+
+        # make displays for buttons
+        buttonMary = pygame.Rect(300, 450, 320, 35)
+        buttonBeau = pygame.Rect(300, 500, 220, 35)
+        buttonKnights = pygame.Rect(300, 400, 300, 35)
+        insrtButton(51, 208, 255, "Mary had a Little Lamb", buttonMary, 300, 450)
+        insrtButton(51, 208, 255, "Beau's Favorite", buttonBeau, 300, 500)
+        insrtButton(51, 208, 255, "Dance of the Knights", buttonKnights, 300, 400)
+
+        # allow site navigation
+        if buttonMary.collidepoint((mouseX, mouseY)):
+            if click:
+                game("ytrtyyy ttt yii ytrtyyyyttytr")
+        if buttonBeau.collidepoint((mouseX, mouseY)):
+            if click:
+                game("qwertyuiop")
+        if buttonKnights.collidepoint((mouseX, mouseY)):
+            if click:
+                game("w tu oR ou tw")
+
+        click = False
+
+        # exit out of game
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            if event.type == KEYDOWN:
+                if event.key == K_ESCAPE:
+                    running = False
+            if event.type == MOUSEBUTTONDOWN:
+                if event.button == 1:
+                    click = True
+
+        pygame.display.update()
+
+
+# interface for play along
 def game(songPlugin):
     running = True
     mary = Song(songPlugin)
     marysheet = mary.compose()
+    score = 0
     while running:
 
         sounds = []
@@ -151,6 +171,9 @@ def game(songPlugin):
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
+            if event.type == KEYDOWN:
+                if event.key == K_ESCAPE:
+                    running = False
 
         # color creation
         white = (255, 255, 255)
@@ -191,8 +214,7 @@ def game(songPlugin):
             else:
                 pygame.draw.rect(screen, black, [x_start2, y_start2, x_width2, y_height2])
 
-            # draw floaters
-
+        # draw floaters
         for k in marysheet:
             if (k.loc <= 14):
                 x_start2 = (60 * k.loc)
@@ -207,16 +229,22 @@ def game(songPlugin):
             if (y_start2 < 530) and k.button != "N":
                 pygame.draw.rect(screen, purple, [x_start2, y_start2, x_width2, y_length2])
 
+        # change the height for each flote note
         for k in marysheet:
             if k.height != 1000:
                 k.setHeight(k.height + 5)
+
+        # saving grace of the code
         time.sleep(0.035)
 
+        # make key disappear when struck correctly and add to score
         for Key in board:
             for k in marysheet:
-                if Key.key == k.button and k.height and 500 and k.height < 530 and Key.struck():
+                if Key.key == k.button and 500 < k.height < 530 and Key.struck():
+                    score += 1
                     marysheet.remove(k)
 
+        # initiate the values for the notes (subject to change to add multiple spaces)
         length = len(marysheet)
         for i in range(length - 1):
             if marysheet[i].key != " ":
@@ -233,20 +261,34 @@ def game(songPlugin):
             else:
                 i += 1
 
+        # make the sound
         if len(sounds) != 0:
             pygame.mixer.music.stop()
             for object in sounds:
                 object.play()
 
+        # display the score
+        if score != 0:
+            extension = int(math.log(score, 10))
+        else:
+            extension = 1
+
+        # display score
+        scr = str(score)
+        insrtButton(30, 50, 200, str("Score: " + scr), pygame.Rect(25, 50, ((extension * 15) + 130), 40), 30, 50)
+
+        # update view
         pygame.display.update()
 
-
+# interface for free play
 def freeGame():
     running = True
     while running:
 
-        time.sleep(0.03)
+        # time.sleep my beloved
+        time.sleep(0.035)
 
+        # sound que to play each note
         sounds = []
 
         # Display auditorium
@@ -257,6 +299,9 @@ def freeGame():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
+            if event.type == KEYDOWN:
+                if event.key == K_ESCAPE:
+                    running = False
 
         # color creation
         white = (255, 255, 255)
@@ -297,8 +342,7 @@ def freeGame():
             else:
                 pygame.draw.rect(screen, black, [x_start2, y_start2, x_width2, y_height2])
 
-            # draw floaters
-
+        # play the keys that have been pressed
         if len(sounds) != 0:
             pygame.mixer.music.stop()
             for object in sounds:
