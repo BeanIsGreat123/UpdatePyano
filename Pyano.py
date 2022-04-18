@@ -61,17 +61,62 @@ def insrtButton(red, green, blue, text, rect, xCord, yCord):
 
 # define and run menu screen
 def menu():
+    click = False
     while True:
 
         screen.fill((255, 255, 255))
 
         mouseX, mouseY = pygame.mouse.get_pos()
-        buttonSong = pygame.Rect(300, 460, 20, 40)
-        insrtButton(51, 208, 255, "Play song", buttonSong, 300, 460)
+        buttonSong = pygame.Rect(300, 450, 150, 35)
+        insrtButton(51, 208, 255, "Play song", buttonSong, 300, 450)
+        buttonFree = pygame.Rect(300, 400, 150, 35)
+        insrtButton(51, 208, 255, "Free Play", buttonFree, 300, 400)
 
         if buttonSong.collidepoint((mouseX, mouseY)):
             if click:
-                game()
+                chooseSong()
+        if buttonFree.collidepoint((mouseX, mouseY)):
+            if click:
+                freeGame()
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            if event.type == KEYDOWN:
+                if event.key == K_ESCAPE:
+                    pygame.quit()
+                    sys.exit()
+            if event.type == MOUSEBUTTONDOWN:
+                if event.button == 1:
+                    click = True
+
+        pygame.display.update()
+
+
+def chooseSong():
+    click = False
+    while True:
+
+        screen.fill((255, 255, 255))
+
+        mouseX, mouseY = pygame.mouse.get_pos()
+        buttonMary = pygame.Rect(300, 450, 320, 35)
+        buttonBeau = pygame.Rect(300, 500, 220, 35)
+        buttonKnights = pygame.Rect(300, 400, 300, 35)
+        insrtButton(51, 208, 255, "Mary had a Little Lamb", buttonMary, 300, 450)
+        insrtButton(51, 208, 255, "Beau's Favorite", buttonBeau, 300, 500)
+        insrtButton(51, 208, 255, "Dance of the Knights", buttonKnights, 300, 400)
+
+        if buttonMary.collidepoint((mouseX, mouseY)):
+            if click:
+                game("ytrtyyy ttt yii ytrtyyyyttytr")
+        if buttonBeau.collidepoint((mouseX, mouseY)):
+            if click:
+                game("qwertyuiop")
+        if buttonKnights.collidepoint((mouseX, mouseY)):
+            if click:
+                game("w tu oR ou tw")
 
         click = False
 
@@ -87,16 +132,13 @@ def menu():
                 if event.button == 1:
                     click = True
 
-    pygame.display.update()
+        pygame.display.update()
 
 
-menu()
-
-
-def game():
+def game(songPlugin):
     running = True
-    marysheet = Song("aaaaaaa")
-    marysheet.compose()
+    mary = Song(songPlugin)
+    marysheet = mary.compose()
     while running:
 
         sounds = []
@@ -162,11 +204,11 @@ def game():
                 y_start2 = k.height
                 y_length2 = 20
                 x_width2 = 30
-            if (y_start2 < 531):
+            if (y_start2 < 530) and k.button != "N":
                 pygame.draw.rect(screen, purple, [x_start2, y_start2, x_width2, y_length2])
 
         for k in marysheet:
-            if k.height != 1000 & k.height != 2000:
+            if k.height != 1000:
                 k.setHeight(k.height + 5)
         time.sleep(0.035)
 
@@ -176,21 +218,20 @@ def game():
                     marysheet.remove(k)
 
         length = len(marysheet)
-        if marysheet[-1].height == 1000:
-            for i in range(length - 1):
-                if (marysheet[i].key != " "):
-                    if marysheet[i].height == 30:
-                        if marysheet[i + 1].button != 'N':
-                            marysheet[i + 1].setHeight(0)
-                            i += 1
-                    elif marysheet[i].height == 60:
-                        if marysheet[i + 1].button == "N":
-                            marysheet[i + 2].setHeight(0)
-                            i += 1
-                    else:
+        for i in range(length - 1):
+            if marysheet[i].key != " ":
+                if marysheet[i].height == 30:
+                    if marysheet[i + 1].button != 'N':
+                        marysheet[i + 1].setHeight(0)
+                        i += 1
+                elif marysheet[i].height == 60:
+                    if marysheet[i + 1].button == "N":
+                        marysheet[i + 2].setHeight(0)
                         i += 1
                 else:
                     i += 1
+            else:
+                i += 1
 
         if len(sounds) != 0:
             pygame.mixer.music.stop()
@@ -200,8 +241,70 @@ def game():
         pygame.display.update()
 
 
-for event in pygame.event.get():
-    if event.type == pygame.QUIT:
-        pygame.quit()
+def freeGame():
+    running = True
+    while running:
 
-#testing
+        time.sleep(0.03)
+
+        sounds = []
+
+        # Display auditorium
+        screen.blit(back_img, (0, 0))
+
+        # make corner x quit out
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+
+        # color creation
+        white = (255, 255, 255)
+        red = (200, 30, 30)
+        black = (0, 0, 0)
+        blue = (20, 50, 250)
+        purple = (255, 0, 255)
+
+        # draw white keys
+        for Key in board:
+            x_start = 60 * Key.location
+            y_start = 530
+            y_height = 110
+            x_width = 50
+
+            if Key.struck():
+                pygame.draw.rect(screen, red, [x_start, y_start, x_width, y_height])
+                mixer.music.load(Key.sound)
+                sound = pygame.mixer.Sound(Key.sound)
+                sound.set_volume(100)
+                sounds.append(sound)
+            else:
+                pygame.draw.rect(screen, white, [x_start, y_start, x_width, y_height])
+
+        # draw black keys
+        for Key in blackboard:
+            x_start2 = ((60 * Key.location) + 40)
+            y_start2 = 530
+            y_height2 = 60
+            x_width2 = 30
+
+            if Key.struck():
+                pygame.draw.rect(screen, blue, [x_start2, y_start2, x_width2, y_height2])
+                mixer.music.load(Key.sound)
+                sound = pygame.mixer.Sound(Key.sound)
+                sound.set_volume(100)
+                sounds.append(sound)
+            else:
+                pygame.draw.rect(screen, black, [x_start2, y_start2, x_width2, y_height2])
+
+            # draw floaters
+
+        if len(sounds) != 0:
+            pygame.mixer.music.stop()
+            for object in sounds:
+                object.play()
+
+        pygame.display.update()
+
+
+menu()
