@@ -271,11 +271,11 @@ def game(songPlugin):
         if score != 0:
             extension = int(math.log(score, 10))
         else:
-            extension = 1
+            extension = 0
 
         # display score
         scr = str(score)
-        insrtButton(30, 50, 200, str("Score: " + scr), pygame.Rect(25, 50, ((extension * 15) + 130), 40), 30, 50)
+        insrtButton(0, 0, 0, str("Score: " + scr), pygame.Rect(25, 50, ((extension * 15) + 130), 40), 30, 50)
 
         # update view
         pygame.display.update()
